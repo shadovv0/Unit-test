@@ -47,3 +47,6 @@ function reverseWordPreservingCase($word)
 
     return implode('', $output);
 }
+
+
+
