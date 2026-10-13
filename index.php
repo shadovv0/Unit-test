@@ -1,52 +1,32 @@
 <?php
 
-function reverseWords($text)
+declare(strict_types=1);
+
+function reverseWords(string $text): string
 {
-    if ($text === '') {
-        return '';
-    }
-
-    preg_match_all('/\p{L}+|\P{L}+/u', $text, $matches);
-    $parts = $matches[0];
-
-    $result = [];
-    foreach ($parts as $part) {
-        if (preg_match('/^\p{L}+$/u', $part)) {
-            $result[] = reverseWordPreservingCase($part);
-        } else {
-            $result[] = $part;
-        }
-    }
-
-    return implode('', $result);
+    return preg_replace_callback(
+        '/\p{L}+/u',
+        static fn (array $matches): string => reverseWordPreservingCase($matches[0]),
+        $text
+    ) ?? '';
 }
 
-function reverseWordPreservingCase($word)
+function reverseWordPreservingCase(string $word): string
 {
     $chars = mb_str_split($word, 1, 'UTF-8');
-    $length = count($chars);
-
-    $isUpper = [];
-    for ($i = 0; $i < $length; $i++) {
-        $char = $chars[$i];
-        $lower = mb_strtolower($char, 'UTF-8');
-        $isUpper[$i] = ($char !== $lower);
-    }
-
     $reversed = array_reverse($chars);
+    $result = '';
 
-    $output = [];
-    for ($i = 0; $i < $length; $i++) {
-        $char = $reversed[$i];
-        if ($isUpper[$i]) {
-            $output[] = mb_strtoupper($char, 'UTF-8');
-        } else {
-            $output[] = mb_strtolower($char, 'UTF-8');
-        }
+    foreach ($reversed as $i => $char) {
+        $original = $chars[$i];
+        $originalUpper = mb_strtoupper($original, 'UTF-8');
+        $originalLower = mb_strtolower($original, 'UTF-8');
+        $isUpper = $original === $originalUpper && $original !== $originalLower;
+
+        $result .= $isUpper
+            ? mb_strtoupper($char, 'UTF-8')
+            : mb_strtolower($char, 'UTF-8');
     }
 
-    return implode('', $output);
+    return $result;
 }
-
-
-
